@@ -6,8 +6,9 @@ def boa_checking(input_filename, output_filename, month):
 
     The csv has Date, Description, Amount, Total Balance"""
 
+    month = str(month)
     def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % str(month))
+        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
 
     def transform(xs):
         return xs[0:3]
@@ -34,21 +35,28 @@ def boa_credit_card(input_filename, output_filename, month):
 
     Posted Date, Reference Number, Payee, Address, Amount"""
 
+    month = str(month)
     def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % str(month))
+        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
 
     def transform(xs):
         return [xs[0], xs[2], xs[4]]
 
-    def preprocess_func(reader):
-        # Remove the description line
-        if reader.next() != ['Posted Date', 'Reference Number', 'Payee',
-                             'Address', 'Amount']:
-            raise ValueError('Expected description line. ' +
-                             'Did the format change?')
+    _csv_read_write(input_filename, output_filename, test, transform, None)
 
-    _csv_read_write(input_filename, output_filename, test, transform,
-                    preprocess_func)
+def chase_credit_card(input_filename, output_filename, month):
+    """Format is one line for description then contents.
+
+    Type, Trans Date, Post Date, Description, Amount"""
+
+    month = str(month)
+    def test(xs):
+        return xs[1].startswith(month) or xs[1].startswith('0%s' % month)
+
+    def transform(xs):
+        return [xs[1], xs[3], xs[4]]
+
+    _csv_read_write(input_filename, output_filename, test, transform, None)
 
 def _csv_read_write(input_filename, output_filename, test, transform,
                     preprocess_func):
@@ -68,9 +76,10 @@ def _csv_read_write(input_filename, output_filename, test, transform,
         It is intended to be used to preprocess the input csv file."""
     with open(input_filename, 'rb') as in_file:
         reader = csv.reader(in_file)
-        preprocess_func(reader)
+        if preprocess_func:
+            preprocess_func(reader)
         with open(output_filename, 'wb') as out_file:
             writer = csv.writer(out_file)
             for row in reader:
-                if test(row):
+                if row and test(row):
                     writer.writerow(transform(row))
