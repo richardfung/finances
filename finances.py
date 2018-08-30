@@ -1,5 +1,18 @@
 import csv
 
+def amex_credit_card(input_filename, output_filename, month):
+    """Format is just contents.
+
+    date, ?, description, ?, ?, ?, ?, amount, ????????..."""
+    month = str(month)
+    def test(xs):
+        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
+
+    def transform(xs):
+        return xs[0].split()[0], xs[2], xs[7]
+
+    _csv_read_write(input_filename, output_filename, test, transform, None)
+
 def boa_checking(input_filename, output_filename, month):
     """Format is some stuff we don't care about for first n lines, then a blank
     line, and then the csv stuff we are interested in.
