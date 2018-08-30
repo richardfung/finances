@@ -28,15 +28,15 @@ def boa_checking(input_filename, output_filename, month):
 
     def preprocess_func(reader):
         # Skip past the first blank line
-        while reader.next():
+        while next(reader):
             pass
         # Remove the description line
-        if reader.next() != ['Date', 'Description', 'Amount', 'Running Bal.']:
+        if next(reader) != ['Date', 'Description', 'Amount', 'Running Bal.']:
             raise ValueError('Expected description line. ' +
                              'Did the format change?')
 
         # Remove the "beginning balance" line
-        if not reader.next()[1].startswith('Beginning balance as of'):
+        if not next(reader)[1].startswith('Beginning balance as of'):
             raise ValueError('Expected beginning balance line. ' +
                              'Did the format change?')
 
@@ -87,11 +87,11 @@ def _csv_read_write(input_filename, output_filename, test, transform,
     preprocess_func is a function that takes a reader and will be called before
         we begin reading the input csv file and writing the output csv file.
         It is intended to be used to preprocess the input csv file."""
-    with open(input_filename, 'rb') as in_file:
+    with open(input_filename, 'r') as in_file:
         reader = csv.reader(in_file)
         if preprocess_func:
             preprocess_func(reader)
-        with open(output_filename, 'wb') as out_file:
+        with open(output_filename, 'w') as out_file:
             writer = csv.writer(out_file)
             for row in reader:
                 if row and test(row):
