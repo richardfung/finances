@@ -4,9 +4,7 @@ def amex_credit_card(input_filename, output_filename, month):
     """Format is just contents.
 
     date, ?, description, ?, ?, ?, ?, amount, ????????..."""
-    month = str(month)
-    def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
+    test = _make_month_test(0, month)
 
     def transform(xs):
         return xs[0].split()[0], xs[2], xs[7]
@@ -20,8 +18,7 @@ def boa_checking(input_filename, output_filename, month):
     The csv has Date, Description, Amount, Total Balance"""
 
     month = str(month)
-    def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
+    test = _make_month_test(0, month)
 
     def transform(xs):
         return xs[0:3]
@@ -48,9 +45,7 @@ def boa_credit_card(input_filename, output_filename, month):
 
     Posted Date, Reference Number, Payee, Address, Amount"""
 
-    month = str(month)
-    def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
+    test = _make_month_test(0, month)
 
     def transform(xs):
         return [xs[0], xs[2], xs[4]]
@@ -62,9 +57,7 @@ def chase_credit_card(input_filename, output_filename, month):
 
     Type, Trans Date, Post Date, Description, Amount"""
 
-    month = str(month)
-    def test(xs):
-        return xs[1].startswith(month) or xs[1].startswith('0%s' % month)
+    test = _make_month_test(1, month)
 
     def transform(xs):
         return [xs[1], xs[3], xs[4]]
@@ -96,3 +89,9 @@ def _csv_read_write(input_filename, output_filename, test, transform,
             for row in reader:
                 if row and test(row):
                     writer.writerow(transform(row))
+
+def _make_month_test(pos, month):
+    month = str(month)
+    def test(xs):
+        return xs[pos].startswith(month) or xs[pos].startswith('0%s' % month)
+    return test
