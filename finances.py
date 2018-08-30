@@ -7,13 +7,12 @@ def boa_checking(input_filename, output_filename, month):
     The csv has Date, Description, Amount, Total Balance"""
 
     def test(xs):
-        return xs[0].startswith(month) or xs[0].startswith('0%s' % month)
+        return xs[0].startswith(month) or xs[0].startswith('0%s' % str(month))
 
     def transform(xs):
         return xs[0:3]
 
-    with open(input_filename, 'rb') as in_file:
-        reader = csv.reader(in_file)
+    def preprocess_func(reader):
         # Skip past the first blank line
         while reader.next():
             pass
@@ -27,6 +26,49 @@ def boa_checking(input_filename, output_filename, month):
             raise ValueError('Expected beginning balance line. ' +
                              'Did the format change?')
 
+    _csv_read_write(input_filename, output_filename, test, transform,
+                    preprocess_func)
+
+def boa_credit_card(input_filename, output_filename, month):
+    """Format is one line for description and then the contents.
+
+    Posted Date, Reference Number, Payee, Address, Amount"""
+
+    def test(xs):
+        return xs[0].startswith(month) or xs[0].startswith('0%s' % str(month))
+
+    def transform(xs):
+        return [xs[0], xs[2], xs[4]]
+
+    def preprocess_func(reader):
+        # Remove the description line
+        if reader.next() != ['Posted Date', 'Reference Number', 'Payee',
+                             'Address', 'Amount']:
+            raise ValueError('Expected description line. ' +
+                             'Did the format change?')
+
+    _csv_read_write(input_filename, output_filename, test, transform,
+                    preprocess_func)
+
+def _csv_read_write(input_filename, output_filename, test, transform,
+                    preprocess_func):
+    """Helper function which handles reading a csv file and writing to another
+    file.
+
+    input_filename is the name of input file.
+    output_filename is the name of the output file.
+    test is a function which takes a list and returns a bool. This will be
+        called on the input csv file rows to determine whether we want to write
+        them to the output.
+    transform is a function that takes a list and returns another list. This
+        function is used to transform the list from the input csv file to the
+        one for the output csv file.
+    preprocess_func is a function that takes a reader and will be called before
+        we begin reading the input csv file and writing the output csv file.
+        It is intended to be used to preprocess the input csv file."""
+    with open(input_filename, 'rb') as in_file:
+        reader = csv.reader(in_file)
+        preprocess_func(reader)
         with open(output_filename, 'wb') as out_file:
             writer = csv.writer(out_file)
             for row in reader:
