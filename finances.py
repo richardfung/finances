@@ -22,7 +22,8 @@ def amex_credit_card(input_filename, month):
     test = _make_month_test(0, month)
 
     def transform(xs):
-        return xs[0].split()[0], xs[2], xs[7]
+        return [xs[0].split()[0], xs[2],
+                '-' + xs[7] if xs[7][0] != '-' else xs[7][1:]]
 
     return _csv_transform(input_filename, test, transform,
                           None)
