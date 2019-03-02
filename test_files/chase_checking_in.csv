@@ -1,0 +1,5 @@
+Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #
+DEBIT,02/19/2019,"VENMO 855-812-4430 NY                        02/17",-13.00,DEBIT_CARD,2342.68,,
+DEBIT,02/11/2019,"ATM WITHDRAWAL                       005546  02/098813 S SE",-60.00,ATM,2055.68,,
+DEBIT,02/11/2019,"ATM WITHDRAWAL                       005543  02/098813 S SE",-100.00,ATM,2115.68,,
+

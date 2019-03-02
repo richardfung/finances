@@ -28,35 +28,6 @@ def amex_credit_card(input_filename, month):
     return _csv_transform(input_filename, test, transform,
                           None)
 
-def boa_checking(input_filename, month):
-    """Format is some stuff we don't care about for first n lines, then a blank
-    line, and then the csv stuff we are interested in.
-
-    The csv has Date, Description, Amount, Total Balance"""
-
-    month = str(month)
-    test = _make_month_test(0, month)
-
-    def transform(xs):
-        return xs[0:3]
-
-    def preprocess_func(reader):
-        # Skip past the first blank line
-        while next(reader):
-            pass
-        # Remove the description line
-        if next(reader) != ['Date', 'Description', 'Amount', 'Running Bal.']:
-            raise ValueError('Expected description line. ' +
-                             'Did the format change?')
-
-        # Remove the "beginning balance" line
-        if not next(reader)[1].startswith('Beginning balance as of'):
-            raise ValueError('Expected beginning balance line. ' +
-                             'Did the format change?')
-
-    return _csv_transform(input_filename, test, transform,
-                          preprocess_func)
-
 def boa_credit_card(input_filename, month):
     """Format is one line for description and then the contents.
 
@@ -70,15 +41,24 @@ def boa_credit_card(input_filename, month):
     return _csv_transform(input_filename, test, transform,
                           None)
 
+def chase_checking(input_filename, month):
+    """Format is one line for description then contents.
+
+    Details,Posting Date,Description,Amount,Type,Balance,Check or Slip"""
+    test = _make_month_test(1, month)
+
+    transform = lambda xs: [xs[1], xs[2], xs[3]]
+    return _csv_transform(input_filename, test, transform, None)
+
 def chase_credit_card(input_filename, month):
     """Format is one line for description then contents.
 
-    Type, Trans Date, Post Date, Description, Amount"""
+    Trans Date, Post Date, Description, Category, Type, Amount"""
 
-    test = _make_month_test(1, month)
+    test = _make_month_test(0, month)
 
     def transform(xs):
-        return [xs[1], xs[3], xs[4]]
+        return [xs[0], xs[2], xs[5]]
 
     return _csv_transform(input_filename, test, transform,
                           None)
@@ -103,7 +83,7 @@ def transform(input_filename, month):
     should pass test_output. This will try all the various types of csv formats
     and return an error if none or more than one are valid and otherwise returns
     the only valid transformation."""
-    transforms = [amex_credit_card, boa_checking, boa_credit_card,
+    transforms = [amex_credit_card, boa_credit_card, chase_checking,
                   chase_credit_card]
     solutions = [t(input_filename, month) for t in transforms]
     valid_solutions = [x for x in solutions if x is not None]
@@ -147,9 +127,12 @@ def _csv_read_write_file(input_filename, output_file, test, transform,
                 writer.writerow(transform(row))
 
 def _make_month_test(pos, month):
+    """ Returns a simple function that tests whether a string starts with
+    the given month in integer format."""
     month = str(month)
+    month = month if len(month) == 2 else '0' + month
     def test(xs):
-        return xs[pos].startswith(month) or xs[pos].startswith('0%s' % month)
+        return xs[pos].startswith(month)
     return test
 
 if __name__ == '__main__':
