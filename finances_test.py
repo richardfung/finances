@@ -29,4 +29,4 @@ def _compare(got, expected_filename):
     with open(os.path.join(TEST_DIR, expected_filename), 'r') \
             as expected_file:
         expected = expected_file.read()
-        assert got.strip() == expected.strip()
+        assert got == expected

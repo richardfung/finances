@@ -1,19 +1,26 @@
+import argparse
 import csv
 import io
-from optparse import OptionParser
 import re
 import sys
 
 def main():
-    usage = 'Usage: %prog input_file month'
-    parser = OptionParser(usage=usage)
-    (options, args) = parser.parse_args()
-    if len(args) != 2:
-        parser.error('Incorrect number of arguments')
-    [input_filename, month] = args[:]
-    if not re.fullmatch('[01]?\d', month):
-        parser.error('Invalid month')
-    print(transform(input_filename, month))
+    parser = argparse.ArgumentParser(description=('Converts csv files from '
+    'different banks to the same format to be parsed by Google Sheets'))
+    parser.add_argument(
+            'input_file',
+            help='input name of csv file')
+    parser.add_argument(
+            '--month',
+            '-m',
+            dest='month',
+            type=int,
+            help=('The month we care about. All rows from other months will '
+                  'be ignored'))
+    args = parser.parse_args()
+    if not re.fullmatch('[01]?\d', str(args.month)):
+        argparse.ArgumentParser.error('Invalid month')
+    sys.stdout.write(transform(args.input_file, args.month))
 
 def amex_credit_card(input_filename, month):
     """Format is just contents.
@@ -88,7 +95,8 @@ def transform(input_filename, month):
     solutions = [t(input_filename, month) for t in transforms]
     valid_solutions = [x for x in solutions if x is not None]
     if not valid_solutions or len(valid_solutions) > 1:
-        raise ValueError("# of valid solutions: %d" % len(valid_solutions))
+        raise ValueError("# of valid solutions: %d" %
+                         0 if not valid_solutions else len(valid_solutions))
     return valid_solutions[0]
 
 def _csv_transform(input_filename, test, transform, preprocess_func):
