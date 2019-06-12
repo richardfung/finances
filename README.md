@@ -3,6 +3,10 @@ Set up venv
 
 `python3 -m venv venv`
 
+Activate venv
+
+`. venv/bin/activate`
+
 Install requirements
 
 `pip install -U -r requirements.txt`
