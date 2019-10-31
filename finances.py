@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 import argparse
 import csv
 import io
@@ -17,10 +19,17 @@ def main():
             type=int,
             help=('The month we care about. All rows from other months will '
                   'be ignored'))
+    parser.add_argument(
+            '--fmt',
+            dest='format',
+            type=str,
+            choices=function_name_map.keys(),
+            help=('The format of the file. If none given, we try to '
+                  'intelligently figure it out.'))
     args = parser.parse_args()
     if not re.fullmatch('[01]?\d', str(args.month)):
         argparse.ArgumentParser.error('Invalid month')
-    sys.stdout.write(transform(args.input_file, args.month))
+    sys.stdout.write(transform(args.input_file, args.month, args.format))
 
 def amex_credit_card(input_filename, month):
     """Format is just contents.
@@ -85,19 +94,23 @@ def test_output(s):
             return False
     return non_empty
 
-def transform(input_filename, month):
+def transform(input_filename, month, fmt):
     """ Transforms the csv file with filename input_filename to output which
     should pass test_output. This will try all the various types of csv formats
     and return an error if none or more than one are valid and otherwise returns
     the only valid transformation."""
-    transforms = [amex_credit_card, boa_credit_card, chase_checking,
-                  chase_credit_card]
-    solutions = [t(input_filename, month) for t in transforms]
-    valid_solutions = [x for x in solutions if x is not None]
-    if not valid_solutions or len(valid_solutions) > 1:
-        raise ValueError("# of valid solutions: %d" %
-                         0 if not valid_solutions else len(valid_solutions))
-    return valid_solutions[0]
+    FunctionMapping = namedtuple('FunctionMapping', ['function', 'name'])
+    if not fmt:
+        transforms = [FunctionMapping(function_name_map[n], n) for n in function_name_map]
+    else:
+        transforms = [FunctionMapping(function_name_map[fmt], fmt)]
+    solutions = [(t(input_filename, month), n) for (t, n) in transforms]
+    valid_solutions = [x for x in solutions if x[0] is not None]
+    if not valid_solutions:
+        raise ValueError('no valid solutions found!')
+    elif len(valid_solutions) > 1:
+        raise ValueError('multiple valid solutions found: ' + str([x[1] for x in valid_solutions]))
+    return valid_solutions[0][0]
 
 def _csv_transform(input_filename, test, transform, preprocess_func):
     # TODO do we need to catch and close?
@@ -141,6 +154,11 @@ def _make_month_test(pos, month):
     def test(xs):
         return xs[pos].startswith(month) or xs[pos].startswith('0' + month)
     return test
+
+function_name_map = {'amex_cc': amex_credit_card,
+                     'boa_cc': boa_credit_card,
+                     'chase_cc': chase_credit_card,
+                     'chase_checking': chase_checking}
 
 if __name__ == '__main__':
     main()

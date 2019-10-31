@@ -5,22 +5,22 @@ import pytest
 TEST_DIR = 'test_files'
 
 def test_amex_credit_card():
-    _test('amex_in.csv', 'amex_out.csv', finances.amex_credit_card, 9)
+    _test('amex_in.csv', 'amex_out.csv', finances.amex_credit_card, 9, 'amex_cc')
 
 def test_boa_credit_card():
-    _test('boa_visa_in.csv', 'boa_visa_out.csv', finances.boa_credit_card, 8)
+    _test('boa_visa_in.csv', 'boa_visa_out.csv', finances.boa_credit_card, 8, 'boa_cc')
 
 def test_chase_checking():
-    _test('chase_checking_in.csv', 'chase_checking_out.csv', finances.chase_checking, 2)
+    _test('chase_checking_in.csv', 'chase_checking_out.csv', finances.chase_checking, 2, 'chase_checking')
 
 def test_chase_credit_card():
-    _test('chase_credit_card_in.csv', 'chase_credit_card_out.csv', finances.chase_credit_card, 2)
+    _test('chase_credit_card_in.csv', 'chase_credit_card_out.csv', finances.chase_credit_card, 2, 'chase_cc')
 
-def _test(in_file, out_file, test_fun, month):
+def _test(in_file, out_file, test_fun, month, fmt):
     got = test_fun(os.path.join(TEST_DIR, in_file), month)
     _compare(got, out_file)
 
-    got = finances.transform(os.path.join(TEST_DIR, in_file), month)
+    got = finances.transform(os.path.join(TEST_DIR, in_file), month, fmt)
     _compare(got, out_file)
 
 def _compare(got, expected_filename):
