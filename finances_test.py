@@ -5,7 +5,7 @@ import pytest
 TEST_DIR = 'test_files'
 
 def test_amex_credit_card():
-    _test('amex_in.csv', 'amex_out.csv', finances.amex_credit_card, 2)
+    _test('amex_in.csv', 'amex_out.csv', finances.amex_credit_card, 9)
 
 def test_boa_credit_card():
     _test('boa_visa_in.csv', 'boa_visa_out.csv', finances.boa_credit_card, 8)

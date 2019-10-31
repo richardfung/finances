@@ -25,12 +25,12 @@ def main():
 def amex_credit_card(input_filename, month):
     """Format is just contents.
 
-    date, ?, description, ?, ?, ?, ?, amount, ????????..."""
+    date, ?, description, ?, ?, amount, ????????..."""
     test = _make_month_test(0, month)
 
     def transform(xs):
-        return [xs[0].split()[0], xs[2],
-                '-' + xs[7] if xs[7][0] != '-' else xs[7][1:]]
+        return [xs[0], xs[2],
+                '-' + xs[5] if xs[5][0] != '-' else xs[5][1:]]
 
     return _csv_transform(input_filename, test, transform,
                           None)
@@ -75,7 +75,7 @@ def test_output(s):
     That is, it should return lines of the form [date, description, amount]"""
     s = io.StringIO(s, newline=None)
     reader = csv.reader(s)
-    date_re = re.compile('\d{2}/\d{2}/\d{4}')
+    date_re = re.compile('\d\d?/\d\d?/(\d{2}|\d{4})')
     amount_re = re.compile('-?\d+\.\d{2}')
     non_empty = False
     for row in reader:
@@ -90,8 +90,9 @@ def transform(input_filename, month):
     should pass test_output. This will try all the various types of csv formats
     and return an error if none or more than one are valid and otherwise returns
     the only valid transformation."""
-    transforms = [amex_credit_card, boa_credit_card, chase_checking,
-                  chase_credit_card]
+    #transforms = [amex_credit_card, boa_credit_card, chase_checking,
+    #              chase_credit_card]
+    transforms = [amex_credit_card]
     solutions = [t(input_filename, month) for t in transforms]
     valid_solutions = [x for x in solutions if x is not None]
     if not valid_solutions or len(valid_solutions) > 1:
@@ -107,7 +108,7 @@ def _csv_transform(input_filename, test, transform, preprocess_func):
                              preprocess_func)
         val = output_file.getvalue()
         return val if test_output(val) else None
-    except:
+    except Exception as e:
         return None
 
 def _csv_read_write_file(input_filename, output_file, test, transform,
@@ -138,9 +139,8 @@ def _make_month_test(pos, month):
     """ Returns a simple function that tests whether a string starts with
     the given month in integer format."""
     month = str(month)
-    month = month if len(month) == 2 else '0' + month
     def test(xs):
-        return xs[pos].startswith(month)
+        return xs[pos].startswith(month) or xs[pos].startswith('0' + month)
     return test
 
 if __name__ == '__main__':
