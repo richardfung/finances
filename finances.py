@@ -90,9 +90,8 @@ def transform(input_filename, month):
     should pass test_output. This will try all the various types of csv formats
     and return an error if none or more than one are valid and otherwise returns
     the only valid transformation."""
-    #transforms = [amex_credit_card, boa_credit_card, chase_checking,
-    #              chase_credit_card]
-    transforms = [amex_credit_card]
+    transforms = [amex_credit_card, boa_credit_card, chase_checking,
+                  chase_credit_card]
     solutions = [t(input_filename, month) for t in transforms]
     valid_solutions = [x for x in solutions if x is not None]
     if not valid_solutions or len(valid_solutions) > 1:
