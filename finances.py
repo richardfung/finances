@@ -155,7 +155,7 @@ def _make_month_test(pos, month):
         return xs[pos].startswith(month) or xs[pos].startswith('0' + month)
     return test
 
-function_name_map = {'amex_cc': amex_credit_card,
+function_name_map = {'amex': amex_credit_card,
                      'boa_cc': boa_credit_card,
                      'chase_cc': chase_credit_card,
                      'chase_checking': chase_checking}
