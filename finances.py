@@ -34,12 +34,12 @@ def main():
 def amex_credit_card(input_filename, month):
     """Format is just contents.
 
-    date, ?, description, ?, ?, amount, ????????..."""
+    date, description, amount"""
     test = _make_month_test(0, month)
 
     def transform(xs):
-        return [xs[0], xs[2],
-                '-' + xs[5] if xs[5][0] != '-' else xs[5][1:]]
+        return [xs[0], xs[1],
+                '-' + xs[2] if xs[2][0] != '-' else xs[2][1:]]
 
     return _csv_transform(input_filename, test, transform,
                           None)
